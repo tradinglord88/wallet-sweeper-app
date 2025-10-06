@@ -1,0 +1,67 @@
+{
+  "name": "dark-pino-airdrop",
+  "version": "1.0.0",
+  "description": "Dark Pino Airdrop - Instant Solana airdrops with one-click claiming through Phantom wallet",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/simple-server.js",
+    "dev": "nodemon backend/simple-server.js",
+    "test": "jest",
+    "test:security": "jest tests/security.test.js",
+    "build-contract": "cd smart-contracts/programs/scheduled-transfer && anchor build",
+    "deploy-contract": "cd smart-contracts/programs/scheduled-transfer && anchor deploy",
+    "setup-db": "node database/setup.js",
+    "lint": "eslint . --ext .js",
+    "security-scan": "npm audit && node scripts/security-scan.js"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "deep-link",
+    "crypto",
+    "security",
+    "payments"
+  ],
+  "author": "Secure Solana Transfer System",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.91.1",
+    "@solana/spl-token": "^0.4.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "redis": "^4.6.11",
+    "pg": "^8.11.3",
+    "tweetnacl": "^1.0.3",
+    "bs58": "^5.0.0",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "express-validator": "^7.0.1",
+    "node-cron": "^3.0.3",
+    "ws": "^8.14.2",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.54.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "@types/jest": "^29.5.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/solana-deep-link-transfer.git"
+  }
+}

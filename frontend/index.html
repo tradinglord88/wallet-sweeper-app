@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dark Pino Transfer - Create instant transfer links between your own Solana wallets with one-click claiming">
+    <title>🍍 Dark Pino Transfer - Personal Solana Wallet Links</title>
+
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.solana.com https://api.coingecko.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <!-- Favicon and App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/dark-pino-styles.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
+
+    <link rel="stylesheet" href="css/dark-pino-styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><span class="pineapple-icon">🍍</span> Dark Pino Transfer</h1>
+                <span class="version">Personal</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
+                <a href="#create" class="nav-link" data-section="create">Create Link</a>
+                <a href="#execute" class="nav-link" data-section="execute">Execute Link</a>
+                <a href="#schedule" class="nav-link" data-section="schedule">Schedule Transfer</a>
+                <a href="#security" class="nav-link" data-section="security">Security</a>
+            </nav>
+
+            <div class="wallet-section">
+                <button id="connectWalletBtn" class="btn btn-primary">Connect Wallet</button>
+                <div id="walletInfo" class="wallet-info" style="display: none;">
+                    <div class="wallet-address" id="walletAddress"></div>
+                    <div class="wallet-balance" id="walletBalance"></div>
+                    <button id="disconnectWalletBtn" class="btn btn-secondary btn-sm">Disconnect</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <div class="container">
+                <div class="section-header">
+                    <h2>🏠 Dashboard</h2>
+                    <p>Overview of your transfer activities and system status</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- System Status -->
+                    <div class="dashboard-card">
+                        <h3>🔋 System Status</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-label">Solana Network</span>
+                                <span class="status-value" id="solanaStatus">Checking...</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Security Services</span>
+                                <span class="status-value" id="securityStatus">Active</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Rate Limit</span>
+                                <span class="status-value" id="rateLimitStatus">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="dashboard-card">
+                        <h3>📊 Recent Activity</h3>
+                        <div id="recentActivity" class="activity-list">
+                            <div class="empty-state">
+                                <p>No recent activity</p>
+                                <small>Connect your wallet to see transfer history</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card">
+                        <h3>⚡ Quick Actions</h3>
+                        <div class="quick-actions">
+                            <button class="quick-action-btn" data-action="create-link">
+                                <span class="icon">🔗</span>
+                                <span class="text">Create Deep Link</span>
+                            </button>
+                            <button class="quick-action-btn" data-action="execute-link">
+                                <span class="icon">▶️</span>
+                                <span class="text">Execute Link</span>
+                            </button>
+                            <button class="quick-action-btn" data-action="schedule-transfer">
+                                <span class="icon">⏰</span>
+                                <span class="text">Schedule Transfer</span>
+                            </button>
+                            <button class="quick-action-btn" data-action="view-security">
+                                <span class="icon">🛡️</span>
+                                <span class="text">Security Settings</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="dashboard-card">
+                        <h3>📈 Statistics</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value" id="totalTransfers">0</span>
+                                <span class="stat-label">Total Transfers</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="totalVolume">0 SOL</span>
+                                <span class="stat-label">Total Volume</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="activeLinks">0</span>
+                                <span class="stat-label">Active Links</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="scheduledTransfers">0</span>
+                                <span class="stat-label">Scheduled</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Link Section -->
+        <section id="create" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>🔗 Create Deep Link</h2>
+                    <p>Generate secure, signed deep links for Solana transfers</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="security-notice">
+                        <div class="notice-icon">🛡️</div>
+                        <div class="notice-content">
+                            <h4>Security Notice</h4>
+                            <p>Deep links are cryptographically signed and include anti-replay protection. Links expire automatically after 15 minutes for security.</p>
+                        </div>
+                    </div>
+
+                    <form id="createLinkForm" class="transfer-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recipientAddress">Recipient Address *</label>
+                                <input type="text" id="recipientAddress" required
+                                       placeholder="Enter Solana wallet address"
+                                       pattern="[1-9A-HJ-NP-Za-km-z]{32,44}"
+                                       title="Valid Solana address required">
+                                <div class="form-help">The destination wallet address for the transfer</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="transferAmount">Amount *</label>
+                                <input type="number" id="transferAmount" required
+                                       min="0.000001" max="100" step="0.000001"
+                                       placeholder="0.0">
+                                <div class="form-help">Maximum 100 SOL per transfer</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tokenType">Token Type</label>
+                                <select id="tokenType">
+                                    <option value="SOL">SOL</option>
+                                    <option value="USDC">USDC</option>
+                                    <option value="USDT">USDT</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="transferMemo">Memo (Optional)</label>
+                            <textarea id="transferMemo" maxlength="200"
+                                    placeholder="Optional message for the transfer"></textarea>
+                            <div class="form-help">Maximum 200 characters</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">
+                                🔗 Generate Deep Link
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Link Result -->
+                    <div id="linkResult" class="link-result" style="display: none;">
+                        <h3>✅ Deep Link Generated</h3>
+
+                        <div class="result-item">
+                            <label>Deep Link URL:</label>
+                            <div class="copy-container">
+                                <input type="text" id="generatedLinkUrl" readonly>
+                                <button class="btn btn-copy" data-copy="generatedLinkUrl">📋 Copy</button>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <label>QR Code:</label>
+                            <div class="qr-container">
+                                <img id="linkQrCode" alt="QR Code for deep link">
+                                <button class="btn btn-download" id="downloadQr">📥 Download QR</button>
+                            </div>
+                        </div>
+
+                        <div class="result-item">
+                            <label>Link Information:</label>
+                            <div class="link-info">
+                                <div class="info-row">
+                                    <span>Tracking ID:</span>
+                                    <span id="linkTrackingId"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span>Expires At:</span>
+                                    <span id="linkExpiresAt"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span>Status:</span>
+                                    <span id="linkStatus" class="status-badge">Active</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-actions">
+                            <button class="btn btn-secondary" id="createAnotherLink">🔗 Create Another</button>
+                            <button class="btn btn-danger" id="revokeLinkBtn">🚫 Revoke Link</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Execute Link Section -->
+        <section id="execute" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>▶️ Execute Deep Link</h2>
+                    <p>Safely execute verified deep link transfers</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="security-notice warning">
+                        <div class="notice-icon">⚠️</div>
+                        <div class="notice-content">
+                            <h4>Security Warning</h4>
+                            <p>Only execute links from trusted sources. Always verify the transfer details before confirming.</p>
+                        </div>
+                    </div>
+
+                    <!-- URL Input Method -->
+                    <div class="execution-method">
+                        <h3>🔗 From URL</h3>
+                        <div class="form-group">
+                            <label for="deepLinkUrl">Deep Link URL</label>
+                            <input type="url" id="deepLinkUrl"
+                                   placeholder="Paste the deep link URL here">
+                            <button class="btn btn-primary" id="parseUrlBtn">📝 Parse Link</button>
+                        </div>
+                    </div>
+
+                    <!-- QR Scanner Method -->
+                    <div class="execution-method">
+                        <h3>📱 From QR Code</h3>
+                        <div class="qr-scanner">
+                            <button class="btn btn-secondary" id="scanQrBtn">📷 Scan QR Code</button>
+                            <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
+                            <button class="btn btn-secondary" id="uploadQrBtn">📁 Upload QR Image</button>
+                        </div>
+                    </div>
+
+                    <!-- Link Details -->
+                    <div id="linkDetails" class="link-details" style="display: none;">
+                        <h3>🔍 Transfer Details</h3>
+
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">From:</span>
+                                <span class="detail-value" id="detailFromAddress"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">To:</span>
+                                <span class="detail-value" id="detailToAddress"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Amount:</span>
+                                <span class="detail-value" id="detailAmount"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Token:</span>
+                                <span class="detail-value" id="detailToken"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Memo:</span>
+                                <span class="detail-value" id="detailMemo"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Expires:</span>
+                                <span class="detail-value" id="detailExpiry"></span>
+                            </div>
+                        </div>
+
+                        <div class="verification-status">
+                            <div class="verification-item">
+                                <span class="verification-icon" id="signatureVerification">⏳</span>
+                                <span>Signature Verification</span>
+                            </div>
+                            <div class="verification-item">
+                                <span class="verification-icon" id="nonceVerification">⏳</span>
+                                <span>Replay Protection</span>
+                            </div>
+                            <div class="verification-item">
+                                <span class="verification-icon" id="timeVerification">⏳</span>
+                                <span>Time Validation</span>
+                            </div>
+                            <div class="verification-item">
+                                <span class="verification-icon" id="addressVerification">⏳</span>
+                                <span>Address Validation</span>
+                            </div>
+                        </div>
+
+                        <div class="execution-actions">
+                            <button class="btn btn-success btn-large" id="executeTransferBtn" disabled>
+                                ✅ Execute Transfer
+                            </button>
+                            <button class="btn btn-secondary" id="simulateTransferBtn">
+                                🧪 Simulate First
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Execution Progress -->
+                    <div id="executionProgress" class="execution-progress" style="display: none;">
+                        <h3>⚡ Executing Transfer</h3>
+                        <div class="progress-steps">
+                            <div class="progress-step" id="step1">
+                                <span class="step-icon">1</span>
+                                <span class="step-text">Preparing transaction...</span>
+                            </div>
+                            <div class="progress-step" id="step2">
+                                <span class="step-icon">2</span>
+                                <span class="step-text">Signing transaction...</span>
+                            </div>
+                            <div class="progress-step" id="step3">
+                                <span class="step-icon">3</span>
+                                <span class="step-text">Submitting to blockchain...</span>
+                            </div>
+                            <div class="progress-step" id="step4">
+                                <span class="step-icon">4</span>
+                                <span class="step-text">Confirming transaction...</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-result" id="executionResult" style="display: none;">
+                            <div class="result-success">
+                                <h4>✅ Transfer Successful!</h4>
+                                <div class="result-details">
+                                    <div class="result-item">
+                                        <span>Transaction ID:</span>
+                                        <a href="#" id="transactionLink" target="_blank" rel="noopener"></a>
+                                    </div>
+                                    <div class="result-item">
+                                        <span>Block Confirmation:</span>
+                                        <span id="confirmationStatus">Confirmed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Transfer Section -->
+        <section id="schedule" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>⏰ Schedule Transfer</h2>
+                    <p>Create time-delayed transfers using smart contracts</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="info-notice">
+                        <div class="notice-icon">ℹ️</div>
+                        <div class="notice-content">
+                            <h4>Smart Contract Scheduling</h4>
+                            <p>Scheduled transfers are executed on-chain using our secure smart contract. You can cancel anytime before execution.</p>
+                        </div>
+                    </div>
+
+                    <form id="scheduleTransferForm" class="transfer-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="scheduleRecipient">Recipient Address *</label>
+                                <input type="text" id="scheduleRecipient" required
+                                       placeholder="Destination wallet address">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="scheduleAmount">Amount *</label>
+                                <input type="number" id="scheduleAmount" required
+                                       min="0.000001" step="0.000001">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="scheduleToken">Token</label>
+                                <select id="scheduleToken">
+                                    <option value="SOL">SOL</option>
+                                    <option value="USDC">USDC</option>
+                                    <option value="USDT">USDT</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="scheduleDate">Execution Date *</label>
+                                <input type="date" id="scheduleDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="scheduleTime">Execution Time *</label>
+                                <input type="time" id="scheduleTime" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="scheduleMemo">Memo (Optional)</label>
+                            <textarea id="scheduleMemo" maxlength="200"
+                                    placeholder="Optional message"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">
+                                ⏰ Schedule Transfer
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Scheduled Transfers List -->
+                    <div class="scheduled-transfers">
+                        <h3>📋 Your Scheduled Transfers</h3>
+                        <div id="scheduledTransfersList" class="transfers-list">
+                            <div class="empty-state">
+                                <p>No scheduled transfers</p>
+                                <small>Create your first scheduled transfer above</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>🛡️ Security Center</h2>
+                    <p>Monitor and configure security settings</p>
+                </div>
+
+                <div class="security-grid">
+                    <!-- Security Status -->
+                    <div class="security-card">
+                        <h3>🔐 Security Status</h3>
+                        <div class="security-items">
+                            <div class="security-item">
+                                <span class="security-icon">✅</span>
+                                <span class="security-text">Wallet Connection Secure</span>
+                            </div>
+                            <div class="security-item">
+                                <span class="security-icon">✅</span>
+                                <span class="security-text">Signature Verification Active</span>
+                            </div>
+                            <div class="security-item">
+                                <span class="security-icon">✅</span>
+                                <span class="security-text">Replay Protection Enabled</span>
+                            </div>
+                            <div class="security-item">
+                                <span class="security-icon">✅</span>
+                                <span class="security-text">Rate Limiting Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Logs -->
+                    <div class="security-card">
+                        <h3>📊 Security Logs</h3>
+                        <div id="securityLogs" class="logs-container">
+                            <div class="log-entry">
+                                <span class="log-time">Just now</span>
+                                <span class="log-message">Wallet connected successfully</span>
+                                <span class="log-level success">INFO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="security-card">
+                        <h3>⚙️ Security Settings</h3>
+                        <div class="settings-form">
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableNotifications" checked>
+                                    Security notifications
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableAuditLog" checked>
+                                    Audit logging
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enableStrictMode">
+                                    Strict security mode
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Processing...</div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+
+    <!-- Service Worker for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>

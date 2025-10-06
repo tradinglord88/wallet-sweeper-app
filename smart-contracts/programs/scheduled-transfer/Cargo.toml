@@ -1,0 +1,36 @@
+[package]
+name = "scheduled-transfer"
+version = "0.1.0"
+description = "Secure time-delayed transfer program for Solana"
+edition = "2021"
+license = "MIT"
+homepage = "https://github.com/your-org/solana-deep-link-transfer"
+repository = "https://github.com/your-org/solana-deep-link-transfer"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "scheduled_transfer"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+anchor-debug = [
+    "anchor-lang/anchor-debug",
+    "anchor-spl/anchor-debug",
+]
+
+[dependencies]
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
+solana-program = "~1.16.0"
+borsh = "0.10.3"
+thiserror = "1.0"
+
+[dev-dependencies]
+solana-program-test = "~1.16.0"
+solana-sdk = "~1.16.0"
+tokio = { version = "1.0", features = ["macros"] }
+assert_matches = "1.4.0"
