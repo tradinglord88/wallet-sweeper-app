@@ -382,19 +382,13 @@ app.get('/health', (req, res) => {
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Sweep page
-// Main page - serve sweep.html as default
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/sweep.html'));
-});
-
-// Sweep page (for compatibility)
 app.get('/sweep', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/sweep.html'));
 });
 
-// All other routes fallback
+// Main page fallback
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/sweep.html'));
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // Start server
