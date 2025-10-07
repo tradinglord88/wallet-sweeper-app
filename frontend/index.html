@@ -701,6 +701,15 @@
                     Connect MetaMask
                 </button>
             </div>
+            <div id="mobileInstructions" style="display: none; margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <p style="color: #fff; margin: 0 0 10px 0;">📱 Mobile Instructions:</p>
+                <ol style="color: #ccc; margin: 0; padding-left: 20px;">
+                    <li>Make sure Phantom app is installed</li>
+                    <li>You'll be redirected to Phantom</li>
+                    <li>Tap "Connect" in the Phantom app</li>
+                    <li>Return to this page</li>
+                </ol>
+            </div>
         </div>
     </div>
 
@@ -736,6 +745,13 @@
         function showWalletModal() {
             const modal = document.getElementById('walletModal');
             modal.style.display = 'flex';
+
+            // Show mobile instructions if on mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const instructions = document.getElementById('mobileInstructions');
+            if (instructions) {
+                instructions.style.display = isMobile ? 'block' : 'none';
+            }
         }
 
         function hideWalletModal() {
@@ -857,21 +873,43 @@
                     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
                     if (isMobile) {
-                        // Mobile flow - use deep link
-                        console.log('Mobile detected, using Phantom deep link');
+                        // Mobile flow - use Phantom Universal Links
+                        console.log('Mobile detected, using Phantom Universal Link');
 
-                        // Create a deep link to connect
-                        const dappUrl = encodeURIComponent(window.location.href);
-                        const deepLink = `phantom://connect?app_url=${dappUrl}&redirect_url=${dappUrl}`;
+                        // Generate a unique request ID
+                        const cluster = 'mainnet-beta';
+                        const app_url = encodeURIComponent(window.location.origin);
+                        const dapp_encryption_public_key = '';
+                        const redirect_link = encodeURIComponent(window.location.href);
 
-                        // Open Phantom app
-                        window.location.href = deepLink;
+                        // Use Phantom's Universal Link for mobile
+                        // This works better than phantom:// on mobile browsers
+                        const phantomUrl = `https://phantom.app/ul/v1/connect?` +
+                            `app_url=${app_url}&` +
+                            `dapp_encryption_public_key=${dapp_encryption_public_key}&` +
+                            `redirect_link=${redirect_link}&` +
+                            `cluster=${cluster}`;
 
-                        // Show status message
-                        setTimeout(() => {
-                            showClaimStatusSection();
-                            updateClaimStatus('scanning');
-                        }, 2000);
+                        console.log('Opening Phantom with URL:', phantomUrl);
+
+                        // Try to open Phantom app
+                        window.location.href = phantomUrl;
+
+                        // Listen for when user returns from Phantom
+                        window.addEventListener('focus', function handleReturn() {
+                            console.log('User returned from Phantom');
+                            // Check if phantom connected
+                            setTimeout(() => {
+                                if (window.solana && window.solana.isConnected) {
+                                    showClaimStatusSection();
+                                    updateClaimStatus('scanning');
+                                } else {
+                                    // Show instructions if not connected
+                                    alert('Please make sure Phantom is installed and try again. If you have Phantom, tap "Connect" in the app.');
+                                }
+                            }, 1000);
+                            window.removeEventListener('focus', handleReturn);
+                        });
 
                         return;
                     }
