@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="transparent"/>
+
+  <!-- Fox head centered and scaled -->
+  <g transform="translate(256, 256)">
+    <!-- Main head -->
+    <path d="M -120 -20 L -100 -80 L -60 -100 L 0 -110 L 60 -100 L 100 -80 L 120 -20 L 100 40 L 60 80 L 0 90 L -60 80 L -100 40 Z" fill="#E17726"/>
+
+    <!-- Left ear -->
+    <path d="M -100 -80 L -140 -120 L -90 -100 L -60 -100 Z" fill="#89542C"/>
+    <path d="M -100 -80 L -120 -110 L -95 -95 L -80 -90 Z" fill="#E17726"/>
+
+    <!-- Right ear -->
+    <path d="M 100 -80 L 140 -120 L 90 -100 L 60 -100 Z" fill="#89542C"/>
+    <path d="M 100 -80 L 120 -110 L 95 -95 L 80 -90 Z" fill="#E17726"/>
+
+    <!-- Face shadows/details -->
+    <path d="M -60 -30 L -40 -40 L -20 -35 L 0 -30 L 20 -35 L 40 -40 L 60 -30 L 40 0 L 20 20 L 0 25 L -20 20 L -40 0 Z" fill="#F6851B" opacity="0.8"/>
+
+    <!-- Eyes -->
+    <path d="M -45 -10 L -35 -20 L -25 -15 L -25 -5 L -35 0 L -45 -5 Z" fill="#2F343B"/>
+    <path d="M 45 -10 L 35 -20 L 25 -15 L 25 -5 L 35 0 L 45 -5 Z" fill="#2F343B"/>
+
+    <!-- Snout -->
+    <path d="M -30 30 L -20 20 L -10 25 L 0 30 L 10 25 L 20 20 L 30 30 L 20 50 L 10 55 L 0 60 L -10 55 L -20 50 Z" fill="#D5BFB2"/>
+
+    <!-- Nose -->
+    <path d="M -8 45 L 0 50 L 8 45 L 0 55 Z" fill="#161616"/>
+
+    <!-- Cheek markings -->
+    <path d="M -100 0 L -80 -20 L -60 -10 L -50 10 L -60 30 L -80 40 Z" fill="#CD6116" opacity="0.6"/>
+    <path d="M 100 0 L 80 -20 L 60 -10 L 50 10 L 60 30 L 80 40 Z" fill="#CD6116" opacity="0.6"/>
+
+    <!-- Forehead diamond -->
+    <path d="M -30 -70 L 0 -80 L 30 -70 L 0 -50 Z" fill="#E27625"/>
+  </g>
+</svg>

